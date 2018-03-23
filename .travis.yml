@@ -1,0 +1,28 @@
+os: osx
+
+env:
+    global:
+        - HOMEBREW_NO_AUTO_UPDATE=1
+
+before_install:
+    - brew update
+    - brew unlink python
+    - brew install python@$V
+    - brew link --overwrite python@$V
+
+script:
+    - curl https://raw.githubusercontent.com/bh107/bohrium/master/package/pip/osx_create_wheel.sh -o osx_create_wheel.sh
+    - bash osx_create_wheel.sh master $PY testing nodeploy
+
+matrix:
+  include:
+    - osx_image: xcode8.3
+      env: BH_STACK=openmp PY=2.7 V=2
+    - osx_image: xcode8.3
+      env: BH_STACK=openmp PY=3.6 V=3
+    - osx_image: xcode9.3beta
+      env: BH_STACK=openmp PY=2.7 V=2
+    - osx_image: xcode9.3beta
+      env: BH_STACK=openmp PY=3.6 V=3
+
+
