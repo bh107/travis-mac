@@ -12,7 +12,7 @@ before_install:
 
 script:
     - curl https://raw.githubusercontent.com/bh107/bohrium/master/package/pip/osx_create_wheel.sh -o osx_create_wheel.sh
-    - bash osx_create_wheel.sh master $PY testing nodeploy
+    - bash osx_create_wheel.sh master $PY testing deploy
 
 matrix:
   include:
