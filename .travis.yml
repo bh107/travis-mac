@@ -19,10 +19,10 @@ matrix:
     - osx_image: xcode8.3
       env: BH_STACK=openmp PY=2.7 V=2
     - osx_image: xcode8.3
-      env: BH_STACK=openmp PY=3.6 V=3
+      env: BH_STACK=openmp PY=3.7 V=3
     - osx_image: xcode9.3beta
       env: BH_STACK=openmp PY=2.7 V=2
     - osx_image: xcode9.3beta
-      env: BH_STACK=openmp PY=3.6 V=3
+      env: BH_STACK=openmp PY=3.7 V=3
 
 
