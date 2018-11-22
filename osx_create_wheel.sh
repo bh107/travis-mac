@@ -24,8 +24,10 @@ export BH_OPENCL_VOLATILE=true
 # Let's install the different versions of Python
 brew install python@2
 # Python v3.6.5 recipe
-brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/f2a764ef944b1080be64bd88dca9a1d80130c558/Formula/python.rb
-brew install python@3
+brew install -f https://raw.githubusercontent.com/Homebrew/homebrew-core/f2a764ef944b1080be64bd88dca9a1d80130c558/Formula/python.rb
+# Python v3.7.1 recipe
+brew unlink python
+brew install -f https://raw.githubusercontent.com/Homebrew/homebrew-core/2b73054ccd723a3ce4c556fd879f08fd8e70d698/Formula/python.rb
 brew unlink python
 
 # We find the first glob match for each Python binary
