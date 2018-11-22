@@ -5,12 +5,12 @@
 #
 # Command line arguments:
 #   1) Set the first argument to the name of the branch to pull from
-#   2) Set the third argument to "testing" if you want to test the wheel package
-#   3) Set the fourth argument to "deploy" if you want to upload the wheel package to PIP,
+#   2) Set the second argument to "testing" if you want to test the wheel package
+#   3) Set the third argument to "deploy" if you want to upload the wheel package to PIP,
 #      in which case you need to set the envs TWINE_USERNAME and TWINE_PASSWORD
 
 if [ "$#" -ne "3" ];
-    then echo "illegal number of parameters -- e.g. master 2.7 testing nodeploy"
+    then echo "illegal number of parameters -- e.g. master testing nodeploy"
 fi
 
 set -e
@@ -21,15 +21,30 @@ export BH_OPENMP_VOLATILE=true
 export BH_OPENCL_PROF=true
 export BH_OPENCL_VOLATILE=true
 
+# Let's install the different versions of Python
 brew install python@2
+# Python v3.6.5 recipe
+brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/f2a764ef944b1080be64bd88dca9a1d80130c558/Formula/python.rb
 brew install python@3
+brew unlink python
+
+# We find the first glob match for each Python binary
+PY27=$(ls /usr/local/Cellar/python@2/2.7.*/bin/python2 | head -n1)
+PY36=$(ls /usr/local/Cellar/python/3.6.*/bin/python3 | head -n1)
+PY37=$(ls /usr/local/Cellar/python/3.7.*/bin/python3 | head -n1)
+$PY27 --version
+$PY36 --version
+$PY37 --version
+# For some reason virtualenv will use this specific path when using python3.6
+ln -s $PY36 /usr/local/opt/python/bin/python3.6
+
+# Install dependencies
 brew install cmake || true
 brew install boost --with-icu4c || true
 brew install libsigsegv || true
 brew install clblas || true
 #brew install opencv || true
-python2 -m pip install virtualenv --user
-python3 -m pip install virtualenv --user
+$PY27 -m pip install virtualenv
 
 # Download source into `~/bh`
 git clone https://github.com/bh107/bohrium.git --branch $1
@@ -38,54 +53,56 @@ mv delocate ~/bh/
 mkdir ~/bh/build
 cd ~/bh/build
 cmake .. -DCMAKE_BUILD_TYPE=Release -DEXT_VISUALIZER=OFF -DVEM_PROXY=OFF \
-         -DPYTHON_EXECUTABLE=/usr/local/bin/python2 \
+         -DPYTHON_EXECUTABLE=$PY27 \
          -DCMAKE_INSTALL_PREFIX=~/bh/install \
          -DPY_WHEEL=~/wheel \
-         -DPY_EXE_LIST="/usr/local/bin/python2;/usr/local/bin/python3"
+         -DPY_EXE_LIST="$PY27;$PY36;$PY37"
 make -j 2
 make install
 
-/usr/local/bin/python2 -m virtualenv ~/vr2
-source ~/vr2/bin/activate
+$PY27 -m virtualenv ~/vr27
+source ~/vr27/bin/activate
 pip install ~/bh/delocate/
 pip install numpy cython scipy gcc7
 delocate-wheel `ls ~/wheel/bohrium_api-*.whl`
-delocate-listdeps `ls ~/wheel/bohrium_api-*.whl`
 
-pip install `ls ~/wheel/bohrium_api-*-cp2*.whl`
+pip install `ls ~/wheel/bohrium_api-*-cp27*.whl`
 python -c "import bohrium_api; print(bohrium_api.__version__)"
-pip install `ls ~/wheel/bohrium-*-cp2*.whl`
+pip install `ls ~/wheel/bohrium-*-cp27*.whl`
 BH_STACK=opencl python -m bohrium --info
 deactivate
 
-/usr/local/bin/python3 -m virtualenv ~/vr3
-source ~/vr3/bin/activate
+$PY27 -m virtualenv -p $PY36 ~/vr36
+source ~/vr36/bin/activate
 pip install numpy cython scipy gcc7
-pip install `ls ~/wheel/bohrium_api-*-cp3*.whl`
+pip install `ls ~/wheel/bohrium_api-*-cp36*.whl`
 python -c "import bohrium_api; print(bohrium_api.__version__)"
-pip install `ls ~/wheel/bohrium-*-cp3*.whl`
+pip install `ls ~/wheel/bohrium-*-cp36*.whl`
+BH_STACK=opencl python -m bohrium --info
+deactivate
+
+$PY27 -m virtualenv -p $PY37 ~/vr37
+source ~/vr37/bin/activate
+pip install numpy cython scipy gcc7
+pip install `ls ~/wheel/bohrium_api-*-cp37*.whl`
+python -c "import bohrium_api; print(bohrium_api.__version__)"
+pip install `ls ~/wheel/bohrium-*-cp37*.whl`
 BH_STACK=opencl python -m bohrium --info
 deactivate
 
 # Testing of the wheel package
 if [ "$2" = "testing" ]; then
-#    # We have to skip some tests because of time constraints on travis-ci.org
-#    set +x
-#    TESTS=""
-#    for t in `ls ~/bh/test/python/tests/test_*.py`; do
-#        if ! [[ $t =~ (mask|reorganization|summations) ]]; then
-#            TESTS="$TESTS $t"
-#        fi
-#    done
-#    set -x
- #   TESTS=`ls ~/bh/test/python/tests/test_primitives.py` `ls ~/bh/test/python/tests/test_ext_*`
-    TESTS=~/bh/test/python/tests/test_primitives.py
+    TESTS=~/bh/test/python/tests/test_array_create.py
 
-    source ~/vr2/bin/activate
+    source ~/vr27/bin/activate
     python ~/bh/test/python/run.py $TESTS
     deactivate
 
-    source ~/vr3/bin/activate
+    source ~/vr36/bin/activate
+    python ~/bh/test/python/run.py $TESTS
+    deactivate
+
+    source ~/vr37/bin/activate
     python ~/bh/test/python/run.py $TESTS
     deactivate
 else
@@ -94,7 +111,7 @@ fi
 
 # Deploy, remember to define TWINE_USERNAME and TWINE_PASSWORD
 if [ "$3" = "deploy" ]; then
-    source ~/vr2/bin/activate
+    source ~/vr27/bin/activate
     pip install twine
     twine upload `ls ~/wheel/bohrium_api-*.whl`
     deactivate
