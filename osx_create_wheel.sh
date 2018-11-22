@@ -115,7 +115,7 @@ fi
 if [ "$3" = "deploy" ]; then
     source ~/vr27/bin/activate
     pip install twine
-    twine upload `ls ~/wheel/bohrium_api-*.whl`
+    twine upload `ls ~/wheel/bohrium_api-*.whl` || true
     deactivate
 else
     echo 'Notice, if you want to run test set third argument to "deploy"'
