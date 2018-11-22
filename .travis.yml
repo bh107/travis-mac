@@ -9,7 +9,7 @@ before_install:
     - brew unlink python
 
 script:
-    - bash osx_create_wheel.sh bh_py_api testing deploy
+    - bash osx_create_wheel.sh master testing deploy
 
 matrix:
   include:

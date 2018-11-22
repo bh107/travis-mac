@@ -32,8 +32,7 @@ python2 -m pip install virtualenv --user
 python3 -m pip install virtualenv --user
 
 # Download source into `~/bh`
-#git clone https://github.com/bh107/bohrium.git --branch $1
-git clone https://github.com/madsbk/bohrium.git --branch $1
+git clone https://github.com/bh107/bohrium.git --branch $1
 mv bohrium ~/bh
 mv delocate ~/bh/
 mkdir ~/bh/build
