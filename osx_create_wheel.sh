@@ -58,15 +58,21 @@ cmake .. -DCMAKE_BUILD_TYPE=Release -DEXT_VISUALIZER=OFF -DVEM_PROXY=OFF \
          -DPYTHON_EXECUTABLE=$PY27 \
          -DCMAKE_INSTALL_PREFIX=~/bh/install \
          -DPY_WHEEL=~/wheel \
-         -DPY_EXE_LIST="$PY27;$PY36;$PY37"
+         -DPY_EXE_LIST="$PY27;$PY36;$PY37" \
+         -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON
 make -j 2
 make install
+cmake --version
+otool -L filter/bccon/libbh_filter_bccon.dylib
+otool -L core/libbh.dylib
 
 $PY27 -m virtualenv ~/vr27
 source ~/vr27/bin/activate
 pip install ~/bh/delocate/
 pip install numpy cython scipy gcc7
+delocate-listdeps `ls ~/wheel/bohrium_api-*.whl`
 delocate-wheel `ls ~/wheel/bohrium_api-*.whl`
+delocate-listdeps `ls ~/wheel/bohrium_api-*.whl`
 
 pip install `ls ~/wheel/bohrium_api-*-cp27*.whl`
 python -c "import bohrium_api; print(bohrium_api.__version__)"
