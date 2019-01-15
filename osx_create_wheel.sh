@@ -22,7 +22,7 @@ export BH_OPENCL_PROF=true
 export BH_OPENCL_VOLATILE=true
 
 # Let's install the different versions of Python
-brew install python@2
+brew install python@2 || true
 # Python v3.6.5 recipe
 brew install -f https://raw.githubusercontent.com/Homebrew/homebrew-core/f2a764ef944b1080be64bd88dca9a1d80130c558/Formula/python.rb
 # Python v3.7.1 recipe
