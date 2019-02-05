@@ -33,6 +33,8 @@ brew install -f https://raw.githubusercontent.com/Homebrew/homebrew-core/2b73054
 brew unlink python
 
 # We find the first glob match for each Python binary
+ls /usr/local/Cellar/python@2/
+ls /usr/local/Cellar/python/
 PY27=$(ls /usr/local/Cellar/python@2/2.7.*/bin/python2 | head -n1)
 PY36=$(ls /usr/local/Cellar/python/3.6.*/bin/python3 | head -n1)
 PY37=$(ls /usr/local/Cellar/python/3.7.*/bin/python3 | head -n1)
