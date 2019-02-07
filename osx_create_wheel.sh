@@ -21,28 +21,13 @@ export BH_OPENMP_VOLATILE=true
 export BH_OPENCL_PROF=true
 export BH_OPENCL_VOLATILE=true
 
-# Let's install the different versions of Python
-brew install python@2 || true
-brew install sphinx-doc
-
-# Python v3.6.5 recipe
-brew install -f https://raw.githubusercontent.com/Homebrew/homebrew-core/f2a764ef944b1080be64bd88dca9a1d80130c558/Formula/python.rb
-# Python v3.7.1 recipe
-brew unlink python
-brew install -f https://raw.githubusercontent.com/Homebrew/homebrew-core/2b73054ccd723a3ce4c556fd879f08fd8e70d698/Formula/python.rb
-brew unlink python
-
-# We find the first glob match for each Python binary
-ls /usr/local/Cellar/python@2/
-ls /usr/local/Cellar/python/
-PY27=$(ls /usr/local/Cellar/python@2/2.7.*/bin/python2 | head -n1)
-PY36=$(ls /usr/local/Cellar/python/3.6.*/bin/python3 | head -n1)
-PY37=$(ls /usr/local/Cellar/python/3.7.*/bin/python3 | head -n1)
+PY27=/opt/py2.7/bin/python2.7
+PY36=/opt/py3.6/bin/python3.6
+PY37=/opt/py3.7/bin/python3.7
 $PY27 --version
 $PY36 --version
 $PY37 --version
-# For some reason virtualenv will use this specific path when using python3.6
-ln -s $PY36 /usr/local/opt/python/bin/python3.6
+sudo $PY36 -m pip install virtualenv
 
 # Install dependencies
 brew install cmake || true
@@ -50,7 +35,6 @@ brew install boost --with-icu4c || true
 brew install libsigsegv || true
 brew install clblas || true
 #brew install opencv || true
-$PY27 -m pip install virtualenv
 
 # Download source into `~/bh`
 git clone https://github.com/bh107/bohrium.git --branch $1
@@ -59,7 +43,7 @@ mv delocate ~/bh/
 mkdir ~/bh/build
 cd ~/bh/build
 cmake .. -DCMAKE_BUILD_TYPE=Release -DEXT_VISUALIZER=OFF -DVEM_PROXY=OFF \
-         -DPYTHON_EXECUTABLE=$PY27 \
+         -DPYTHON_EXECUTABLE=$PY36 \
          -DCMAKE_INSTALL_PREFIX=~/bh/install \
          -DPY_WHEEL=~/wheel \
          -DPY_EXE_LIST="$PY27;$PY36;$PY37" \
@@ -70,7 +54,7 @@ cmake --version
 otool -L filter/bccon/libbh_filter_bccon.dylib
 otool -L core/libbh.dylib
 
-$PY27 -m virtualenv ~/vr27
+$PY36 -m virtualenv -p $PY27 ~/vr27
 source ~/vr27/bin/activate
 pip install ~/bh/delocate/
 pip install numpy cython scipy gcc7
@@ -84,7 +68,7 @@ pip install `ls ~/wheel/bohrium-*-cp27*.whl`
 BH_STACK=opencl python -m bohrium --info
 deactivate
 
-$PY27 -m virtualenv -p $PY36 ~/vr36
+$PY36 -m virtualenv -p $PY36 ~/vr36
 source ~/vr36/bin/activate
 pip install numpy cython scipy gcc7
 pip install `ls ~/wheel/bohrium_api-*-cp36*.whl`
@@ -93,7 +77,7 @@ pip install `ls ~/wheel/bohrium-*-cp36*.whl`
 BH_STACK=opencl python -m bohrium --info
 deactivate
 
-$PY27 -m virtualenv -p $PY37 ~/vr37
+$PY36 -m virtualenv -p $PY37 ~/vr37
 source ~/vr37/bin/activate
 pip install numpy cython scipy gcc7
 pip install `ls ~/wheel/bohrium_api-*-cp37*.whl`
@@ -128,7 +112,7 @@ if [ "$3" = "deploy" ]; then
     twine upload `ls ~/wheel/bohrium_api-*.whl` || true
     deactivate
 else
-    echo 'Notice, if you want to run test set third argument to "deploy"'
+    echo 'Notice, if you want to upload the packages set third argument to "deploy"'
 fi
 
 
