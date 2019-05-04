@@ -61,11 +61,12 @@ pip install numpy cython scipy gcc7
 delocate-listdeps `ls ~/wheel/bohrium_api-*.whl`
 delocate-wheel `ls ~/wheel/bohrium_api-*.whl`
 delocate-listdeps `ls ~/wheel/bohrium_api-*.whl`
-
 pip install `ls ~/wheel/bohrium_api-*-cp27*.whl`
 python -c "import bohrium_api; print(bohrium_api.__version__)"
 pip install `ls ~/wheel/bohrium-*-cp27*.whl`
 BH_STACK=opencl python -m bohrium --info
+pip install ~/bh/bridge/bh107/
+cd ~/bh/bridge/bh107/ && python setup.py sdist -d ~/sdisthouse/
 deactivate
 
 $PY36 -m virtualenv -p $PY36 ~/vr36
@@ -75,6 +76,8 @@ pip install `ls ~/wheel/bohrium_api-*-cp36*.whl`
 python -c "import bohrium_api; print(bohrium_api.__version__)"
 pip install `ls ~/wheel/bohrium-*-cp36*.whl`
 BH_STACK=opencl python -m bohrium --info
+pip install ~/bh/bridge/bh107/
+cd ~/bh/bridge/bh107/ && python setup.py sdist -d ~/sdisthouse/
 deactivate
 
 $PY36 -m virtualenv -p $PY37 ~/vr37
@@ -84,6 +87,8 @@ pip install `ls ~/wheel/bohrium_api-*-cp37*.whl`
 python -c "import bohrium_api; print(bohrium_api.__version__)"
 pip install `ls ~/wheel/bohrium-*-cp37*.whl`
 BH_STACK=opencl python -m bohrium --info
+pip install ~/bh/bridge/bh107/
+cd ~/bh/bridge/bh107/ && python setup.py sdist -d ~/sdisthouse/
 deactivate
 
 # Testing of the wheel package
@@ -110,6 +115,7 @@ if [ "$3" = "deploy" ]; then
     source ~/vr27/bin/activate
     pip install twine
     twine upload `ls ~/wheel/bohrium_api-*.whl` || true
+    twine upload `ls ~/sdisthouse/*` || true
     deactivate
 else
     echo 'Notice, if you want to upload the packages set third argument to "deploy"'
